@@ -41,7 +41,7 @@ ENV NB_USER beakerx
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends apt-utils sudo curl unzip software-properties-common apt-transport-https git bzip2 wget locales
+RUN apt-get install -y --no-install-recommends apt-utils sudo curl unzip software-properties-common apt-transport-https git bzip2 wget locales python python3 build-essential
 RUN apt-get dist-upgrade -y
 RUN locale-gen en_US.UTF-8
 
@@ -62,6 +62,7 @@ COPY configuration.yml /home/beakerx/
 RUN conda env create -n beakerx -f /home/beakerx/configuration.yml
 RUN conda install -y -n beakerx -c conda-forge jupyterhub jupyterlab pyzmq pytest
 
+
 ENV LANG=en_US.UTF-8
 ENV LC_CTYPE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
@@ -74,19 +75,22 @@ COPY beakerx jitpack.yml js kernel test /home/beakerx/
 COPY docker/setup.sh / $HOME/
 COPY docker/start.sh docker/start-notebook.sh docker/start-singleuser.sh /usr/local/bin/
 COPY docker/jupyter_notebook_config.py /etc/jupyter/
-
+RUN conda init bash
 WORKDIR $HOME
 
 ###################
 #      Build      #
 ###################
 RUN chown -R beakerx:beakerx /home/beakerx /opt/conda/envs/beakerx  && \
-    /home/beakerx/setup.sh
+    /bin/bash /home/beakerx/setup.sh
 
 # Add documentation
 COPY NOTICE README.md StartHere.ipynb doc /home/beakerx/
 
-USER $NB_USER
+USER root
+RUN mkdir -pv /app/common
+RUN chown -R beakerx:beakerx /app/common
+VOLUME ["/app/common"]
 
 EXPOSE 8888
 
