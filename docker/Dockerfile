@@ -87,7 +87,10 @@ RUN chown -R beakerx:beakerx /home/beakerx /opt/conda/envs/beakerx  && \
 # Add documentation
 COPY NOTICE README.md StartHere.ipynb doc /home/beakerx/
 
-USER $NB_USER
+USER root
+RUN mkdir -pv /app/common
+RUN chown -R beakerx:beakerx /app/common
+VOLUME ["/app/common"]
 
 EXPOSE 8888
 
