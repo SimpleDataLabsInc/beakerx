@@ -14,6 +14,8 @@
 # limitations under the License.
 
 set -ex
+conda update -n base -c defaults conda
+conda activate beakerx
 source activate beakerx
 (cd beakerx; pip install -r requirements.txt --verbose)
 beakerx install
