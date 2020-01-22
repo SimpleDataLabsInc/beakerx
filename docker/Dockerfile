@@ -75,7 +75,8 @@ COPY beakerx jitpack.yml js kernel test /home/beakerx/
 COPY docker/setup.sh / $HOME/
 COPY docker/start.sh docker/start-notebook.sh docker/start-singleuser.sh /usr/local/bin/
 COPY docker/jupyter_notebook_config.py /etc/jupyter/
-
+RUN conda init --all
+RUN bash
 WORKDIR $HOME
 
 ###################
