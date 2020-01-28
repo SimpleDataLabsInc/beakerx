@@ -20,8 +20,8 @@ import com.twosigma.beakerx.kernel.KernelFunctionality;
 import com.twosigma.beakerx.kernel.MagicKernelManager;
 import com.twosigma.beakerx.kernel.restserver.BeakerXServer;
 import com.twosigma.beakerx.kernel.restserver.RESTAction;
-import io.javalin.Handler;
 import io.javalin.Javalin;
+import io.javalin.http.Handler;
 import org.jetbrains.annotations.NotNull;
 
 import static com.twosigma.beakerx.BeakerXClient.CODE_CELL_PATH;
@@ -51,9 +51,7 @@ public abstract class BeakerXServerJavalin implements BeakerXServer {
   private Javalin createServer(KernelFunctionality kernel) {
     this.freePort = MagicKernelManager.findFreePort();
     Javalin server = Javalin.create()
-            .disableStartupBanner()
-            .port(this.freePort)
-            .start();
+            .start(this.freePort);
     doCreateMapping(server, kernel);
     return server;
   }
@@ -77,7 +75,7 @@ public abstract class BeakerXServerJavalin implements BeakerXServer {
       kernel.killAllThreads();
     });
     server.post(CANCEL_EXECUTION+"/:groupname", ctx -> {
-      kernel.cancelExecution(GroupName.of(ctx.param("groupname")));
+      kernel.cancelExecution(GroupName.of(ctx.pathParam("groupname")));
     });
 
     server.post(URL_ARG, ctx -> {
