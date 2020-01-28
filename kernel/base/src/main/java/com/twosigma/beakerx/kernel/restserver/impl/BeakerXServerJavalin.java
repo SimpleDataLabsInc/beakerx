@@ -21,7 +21,7 @@ import com.twosigma.beakerx.kernel.MagicKernelManager;
 import com.twosigma.beakerx.kernel.restserver.BeakerXServer;
 import com.twosigma.beakerx.kernel.restserver.RESTAction;
 import io.javalin.Javalin;
-import io.javalin.http.Handler;
+import io.javalin.Handler;
 import org.jetbrains.annotations.NotNull;
 
 import static com.twosigma.beakerx.BeakerXClient.CODE_CELL_PATH;
@@ -75,7 +75,7 @@ public abstract class BeakerXServerJavalin implements BeakerXServer {
       kernel.killAllThreads();
     });
     server.post(CANCEL_EXECUTION+"/:groupname", ctx -> {
-      kernel.cancelExecution(GroupName.of(ctx.pathParam("groupname")));
+      kernel.cancelExecution(GroupName.of(ctx.param("groupname")));
     });
 
     server.post(URL_ARG, ctx -> {
