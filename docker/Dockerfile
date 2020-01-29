@@ -90,8 +90,12 @@ COPY NOTICE README.md StartHere.ipynb doc /home/beakerx/
 
 USER root
 RUN mkdir -pv /app/common
-RUN chown -R beakerx:beakerx /app/common
-VOLUME ["/app/common"]
+RUN mkdir -pv /app/logs
+RUN mkdir -pv /app/cache
+RUN mkdir -pv /opt/conda/envs/beakerx/share/beakerx/maven/cache/
+RUN chown -R $NB_USER:$NB_USER /app/common /app/logs /app/cache/opt/conda/envs/beakerx/share/beakerx/maven/cache/
+VOLUME ["/app/common", "/app/logs", "/app/cache", "/opt/conda/envs/beakerx/share/beakerx/maven/cache/"]
+USER $NB_USER
 
 EXPOSE 8888
 
