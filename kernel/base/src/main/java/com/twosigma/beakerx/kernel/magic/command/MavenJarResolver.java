@@ -109,6 +109,7 @@ public class MavenJarResolver {
       this.logs.stop();
       return getResult(invocationResult, dependencies);
     } catch (Exception e) {
+      logger.error("Unable to pull dep", e);
       return AddMvnCommandResult.error(e.getMessage());
     } finally {
       deletePomFolder(finalPom);
