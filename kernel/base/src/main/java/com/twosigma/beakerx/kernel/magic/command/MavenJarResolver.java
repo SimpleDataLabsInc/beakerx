@@ -75,16 +75,19 @@ public class MavenJarResolver {
 
 
   public AddMvnCommandResult retrieve(PomStyleDependencies dependencies, Message parent) {
+    logger.error("Dependencies: " + dependencies);
     String pomAsString = pomFactory.createPom(new PomFactory.Params(pathToMavenRepo, commandParams.getRepos(), GOAL, MAVEN_BUILT_CLASSPATH_FILE_NAME), dependencies);
     return retrieveDeps(dependencies.asString(), parent, pomAsString);
   }
 
   public AddMvnCommandResult retrieve(Dependency dependency, Message parent) {
+    logger.error("Dependencies: " + dependency);
     List<Dependency> dependencies = singletonList(dependency);
     return retrieve(dependencies, parent);
   }
 
   public AddMvnCommandResult retrieve(List<Dependency> dependencies, Message parent) {
+    logger.error("Dependencies: " + dependencies);
     String pomAsString = pomFactory.createPom(new PomFactory.Params(pathToMavenRepo, commandParams.getRepos(), GOAL, MAVEN_BUILT_CLASSPATH_FILE_NAME), dependencies);
     String deps = dependencies.stream().map(Dependency::toString).collect(Collectors.joining());
     return retrieveDeps(deps, parent, pomAsString);
@@ -93,6 +96,7 @@ public class MavenJarResolver {
   private AddMvnCommandResult retrieveDeps(String dependencies, Message parent, String pomAsString) {
     File finalPom = null;
     try {
+      logger.info("Pom is: " + pomAsString + ", Jars will be saved to: " + commandParams.getPathToNotebookJars());
       finalPom = saveToFile(commandParams.getPathToNotebookJars(), pomAsString);
       InvocationRequest request = createInvocationRequest(finalPom);
       MvnDownloadLoggerWidget progress = new MvnDownloadLoggerWidget(parent);
@@ -105,6 +109,7 @@ public class MavenJarResolver {
       this.logs.stop();
       return getResult(invocationResult, dependencies);
     } catch (Exception e) {
+      logger.error("Unable to pull dep", e);
       return AddMvnCommandResult.error(e.getMessage());
     } finally {
       deletePomFolder(finalPom);
