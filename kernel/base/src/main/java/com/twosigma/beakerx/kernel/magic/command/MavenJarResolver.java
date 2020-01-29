@@ -75,6 +75,7 @@ public class MavenJarResolver {
 
 
   public AddMvnCommandResult retrieve(PomStyleDependencies dependencies, Message parent) {
+    logger.error("Dependencies: " + dependencies);
     String pomAsString = pomFactory.createPom(new PomFactory.Params(pathToMavenRepo, commandParams.getRepos(), GOAL, MAVEN_BUILT_CLASSPATH_FILE_NAME), dependencies);
     return retrieveDeps(dependencies.asString(), parent, pomAsString);
   }
@@ -86,6 +87,7 @@ public class MavenJarResolver {
   }
 
   public AddMvnCommandResult retrieve(List<Dependency> dependencies, Message parent) {
+    logger.error("Dependencies: " + dependencies);
     String pomAsString = pomFactory.createPom(new PomFactory.Params(pathToMavenRepo, commandParams.getRepos(), GOAL, MAVEN_BUILT_CLASSPATH_FILE_NAME), dependencies);
     String deps = dependencies.stream().map(Dependency::toString).collect(Collectors.joining());
     return retrieveDeps(deps, parent, pomAsString);
