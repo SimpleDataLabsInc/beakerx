@@ -80,6 +80,7 @@ public class MavenJarResolver {
   }
 
   public AddMvnCommandResult retrieve(Dependency dependency, Message parent) {
+    logger.error("Dependencies: " + dependency);
     List<Dependency> dependencies = singletonList(dependency);
     return retrieve(dependencies, parent);
   }
@@ -93,6 +94,7 @@ public class MavenJarResolver {
   private AddMvnCommandResult retrieveDeps(String dependencies, Message parent, String pomAsString) {
     File finalPom = null;
     try {
+      logger.info("Pom is: " + pomAsString + ", Jars will be saved to: " + commandParams.getPathToNotebookJars());
       finalPom = saveToFile(commandParams.getPathToNotebookJars(), pomAsString);
       InvocationRequest request = createInvocationRequest(finalPom);
       MvnDownloadLoggerWidget progress = new MvnDownloadLoggerWidget(parent);
