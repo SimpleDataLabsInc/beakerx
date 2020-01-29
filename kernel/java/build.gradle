@@ -45,6 +45,7 @@ repositories {
 
 dependencies {
   provided project(':base')
+  compile group: 'org.eclipse.jetty.websocket', name: 'websocket-server', version: '9.4.14.v20181114'
   compile group: 'org.antlr', name: 'antlr4-runtime', version: "$antlr4Version"
 
   testCompile project(':base').sourceSets.test.output

@@ -39,6 +39,7 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.3.1'
     provided project(':base')
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-server', version: '9.4.14.v20181114'
 }
 
 task jvmInspectJavaDoc(type: Javadoc) {
