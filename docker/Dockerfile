@@ -41,7 +41,7 @@ ENV NB_USER beakerx
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends apt-utils sudo curl unzip software-properties-common apt-transport-https git bzip2 wget locales python python3 build-essential
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils sudo curl unzip software-properties-common apt-transport-https git bzip2 wget locales python python3 build-essential
 RUN apt-get dist-upgrade -y
 RUN locale-gen en_US.UTF-8
 
