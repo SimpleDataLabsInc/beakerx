@@ -39,9 +39,10 @@ public class ClasspathAddMvnMagicCommand extends ClasspathMagicCommand {
   public static final String MVN = "mvn";
   public static final String CLASSPATH_ADD_MVN = CLASSPATH + " " + ADD + " " + MVN;
   public static final String ADD_MVN_FORMAT_ERROR_MESSAGE = "Wrong command format, should be" + CLASSPATH_ADD_MVN + " group name version [type classifier] or " + CLASSPATH_ADD_MVN + " group:name:version[:type:classifier]";
-
+  private static final String repoHost = System.getenv().getOrDefault("REPOSITORY", "localhost:8081");
   public static Map<String, String> DEFAULT_MAVEN_REPOS = unmodifiableMap(new HashMap<String, String>() {{
     put("jitpack.io", "https://jitpack.io");
+    put("local.maven", "http://" + repoHost + "/repository/maven_group/");
   }});
 
   private MavenJarResolver.ResolverParams commandParams;
