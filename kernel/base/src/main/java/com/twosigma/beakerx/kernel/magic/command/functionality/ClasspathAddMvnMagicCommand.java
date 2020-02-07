@@ -43,7 +43,8 @@ public class ClasspathAddMvnMagicCommand extends ClasspathMagicCommand {
   public static Map<String, String> DEFAULT_MAVEN_REPOS = unmodifiableMap(new HashMap<String, String>() {{
     put("jitpack.io", "https://jitpack.io");
     put("local.maven", "http://" + repoHost + "/repository/maven_group/");
-    put("spring-milestone", "https://repo.spring.io/libs-milestone/");
+    put("spring.milestone", "https://repo.spring.io/libs-milestone/");
+    put("hdp.repo", "https://repo.hortonworks.com/content/repositories/releases/")
   }});
 
   private MavenJarResolver.ResolverParams commandParams;
