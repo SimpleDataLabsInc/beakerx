@@ -25,6 +25,8 @@ import com.twosigma.beakerx.kernel.magic.command.PomFactory;
 import com.twosigma.beakerx.kernel.magic.command.outcome.MagicCommandOutcomeItem;
 import com.twosigma.beakerx.kernel.magic.command.outcome.MagicCommandOutput;
 import com.twosigma.beakerx.message.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,11 +42,12 @@ public class ClasspathAddMvnMagicCommand extends ClasspathMagicCommand {
   public static final String CLASSPATH_ADD_MVN = CLASSPATH + " " + ADD + " " + MVN;
   public static final String ADD_MVN_FORMAT_ERROR_MESSAGE = "Wrong command format, should be" + CLASSPATH_ADD_MVN + " group name version [type classifier] or " + CLASSPATH_ADD_MVN + " group:name:version[:type:classifier]";
   private static final String repoHost = System.getenv().getOrDefault("REPOSITORY", "localhost:8081");
+  private static final Logger logger = LoggerFactory.getLogger(ClasspathAddMvnMagicCommand.class);
   public static Map<String, String> DEFAULT_MAVEN_REPOS = unmodifiableMap(new HashMap<String, String>() {{
     put("jitpack.io", "https://jitpack.io");
     put("local.maven", "http://" + repoHost + "/repository/maven_group/");
     put("spring.milestone", "https://repo.spring.io/libs-milestone/");
-    put("hdp.repo", "https://repo.hortonworks.com/content/repositories/releases/")
+    put("hdp.repo", "https://repo.hortonworks.com/content/repositories/releases/");
   }});
 
   private MavenJarResolver.ResolverParams commandParams;
@@ -129,6 +132,7 @@ public class ClasspathAddMvnMagicCommand extends ClasspathMagicCommand {
 
   public void resetRepo() {
     this.repos = new Repos();
+    logger.info("Repos: {}", DEFAULT_MAVEN_REPOS);
     DEFAULT_MAVEN_REPOS.entrySet().stream().forEach(x -> repos.add(x.getKey(), x.getValue()));
   }
 }
