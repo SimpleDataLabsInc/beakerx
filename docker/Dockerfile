@@ -95,6 +95,7 @@ RUN mkdir -pv /opt/conda/envs/beakerx/share/beakerx/maven/cache/
 RUN chown -R beakerx:beakerx /app/common /app/logs /app/cache /opt/conda/envs/beakerx/share/beakerx/maven/cache/
 VOLUME ["/app/common", "/app/logs", "/app/cache", "/opt/conda/envs/beakerx/share/beakerx/maven/cache/"]
 USER $NB_USER
+RUN mkdir -pv $HOME/jars
 EXPOSE 8888
 
 CMD ["start-notebook.sh"]
