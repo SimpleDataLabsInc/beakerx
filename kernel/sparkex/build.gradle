@@ -34,6 +34,9 @@ repositories {
     maven {
         url 'https://repo.hortonworks.com/content/repositories/releases'
     }
+    maven {
+        url 'https://repo.spring.io/libs-milestone/'
+    }
 }
 dependencies {
     provided project(':base')
