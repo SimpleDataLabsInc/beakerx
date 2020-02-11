@@ -42,6 +42,9 @@ repositories {
   maven {
     url 'http://redshift-maven-repository.s3-website-us-east-1.amazonaws.com/release'
   }
+  maven {
+    url 'https://repo.hortonworks.com/content/repositories/releases'
+  }
 }
 
 dependencies {

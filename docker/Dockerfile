@@ -18,15 +18,15 @@ ARG VCS_REF
 ARG VERSION
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
-      org.label-schema.name="BeakerX" \
-      org.label-schema.description="BeakerX is a collection of kernels and extensions to the Jupyter interactive computing environment. It provides JVM support, interactive plots, tables, forms, publishing, and more." \
-      org.label-schema.url="http://beakerx.com/" \
+      org.label-schema.name="Prophecy.io" \
+      org.label-schema.description="Prophecy.io Notebook" \
+      org.label-schema.url="http://prophecy.io/" \
       org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url="https://github.com/twosigma/beakerx" \
+      org.label-schema.vcs-url="https://github.com/SimpleDataLabsInc/beakerx.git" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"
 
-MAINTAINER BeakerX Feedback <beakerx-feedback@twosigma.com>
+MAINTAINER Prophecy.io <info@prophecy.io>
 
 
 ###################
