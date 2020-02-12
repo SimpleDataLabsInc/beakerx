@@ -36,7 +36,7 @@ trait CategoryPointsProperties extends CategoryGraphicsProperties {
   def outlineColors: Seq[Object] = getNullableList(getOutlineColors)
   def outlineColor_=(outlineColor: Color): Unit = setOutlineColor(outlineColor)
   def outlineColor_=(outlineColor: java.awt.Color): Unit = setOutlineColor(outlineColor)
-  def outlineColor_=[T <: AnyRef : BeakerColor](outlineColors: Seq[T]): Unit = setOutlineColor(outlineColors.toObjects.asJava)
+  def outlineColor_=[T <: AnyRef : BeakerColor](outlineColors: Seq[T]): Unit = setOutlineColor(outlineColors.toList.map{x => x.asInstanceOf[Object]}.asJava)
 
   def shape: ShapeType = getShape
   def shapes: Seq[ShapeType] = getNullableList(getShapes)
