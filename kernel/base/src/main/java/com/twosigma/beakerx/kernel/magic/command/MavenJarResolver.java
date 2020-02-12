@@ -93,6 +93,7 @@ public class MavenJarResolver {
   private AddMvnCommandResult retrieveDeps(String dependencies, Message parent, String pomAsString) {
     File finalPom = null;
     try {
+      logger.info("Pom is: " + pomAsString + ", Jars will be saved to: " + commandParams.getPathToNotebookJars());
       finalPom = saveToFile(commandParams.getPathToNotebookJars(), pomAsString);
       InvocationRequest request = createInvocationRequest(finalPom);
       MvnDownloadLoggerWidget progress = new MvnDownloadLoggerWidget(parent);
@@ -105,6 +106,7 @@ public class MavenJarResolver {
       this.logs.stop();
       return getResult(invocationResult, dependencies);
     } catch (Exception e) {
+      logger.error("Unable to pull dep", e);
       return AddMvnCommandResult.error(e.getMessage());
     } finally {
       deletePomFolder(finalPom);
