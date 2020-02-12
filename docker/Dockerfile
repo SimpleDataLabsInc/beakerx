@@ -58,7 +58,6 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
 
 RUN apt-get clean
 RUN apt-get dist-upgrade
-RUN apt-cache search sass
 COPY configuration.yml /home/beakerx/
 RUN conda update -n base -c defaults conda
 RUN conda env create -n beakerx -f /home/beakerx/configuration.yml
