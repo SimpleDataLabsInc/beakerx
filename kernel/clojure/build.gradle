@@ -45,7 +45,7 @@ repositories {
 }
 
 dependencies {
-  provided project(':base')
+  compile project(':base')
   compile group: 'org.clojure', name: 'clojure', version: '1.9.0'
   compile group: 'com.cemerick', name: 'pomegranate', version: '0.3.1'
 
