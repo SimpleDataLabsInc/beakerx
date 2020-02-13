@@ -90,6 +90,9 @@ public class Code {
         kernel.startEvaluation();
         takeCodeFramesWithoutLast().forEach(frame -> frame.executeFrame(this, kernel, message, executionCount));
         takeLastCodeFrame().executeLastFrame(this, kernel, message, executionCount);
+      } catch (Exception e) {
+        System.out.println(e);
+        throw e;
       } finally {
         kernel.endEvaluation();
       }
