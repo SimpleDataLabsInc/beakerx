@@ -98,4 +98,4 @@ USER $NB_USER
 RUN mkdir -pv $HOME/jars
 EXPOSE 8888
 
-CMD ["start-notebook.sh"]
+#CMD ["start-notebook.sh"]
