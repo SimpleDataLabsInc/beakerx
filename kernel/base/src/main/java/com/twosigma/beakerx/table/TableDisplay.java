@@ -25,7 +25,6 @@ import com.twosigma.beakerx.table.action.TableActionDetails;
 import com.twosigma.beakerx.table.format.TableDisplayStringFormat;
 import com.twosigma.beakerx.table.format.TimeStringFormat;
 import com.twosigma.beakerx.table.format.ValueStringFormat;
-import com.twosigma.beakerx.table.handlers.StateRequestMsgCallbackHandler;
 import com.twosigma.beakerx.table.handlers.ValueChangeMsgCallbackHandler;
 import com.twosigma.beakerx.table.highlight.TableDisplayCellHighlighter;
 import com.twosigma.beakerx.table.highlight.ValueHighlighter;
@@ -33,6 +32,7 @@ import com.twosigma.beakerx.table.renderer.TableDisplayCellRenderer;
 import com.twosigma.beakerx.widget.BeakerxWidget;
 import com.twosigma.beakerx.widget.ChangeItem;
 import com.twosigma.beakerx.widget.RunWidgetClosure;
+import org.apache.commons.collections.map.LinkedMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,10 +59,12 @@ import static com.twosigma.beakerx.table.TableDisplayToJson.serializeHeaderFontS
 import static com.twosigma.beakerx.table.TableDisplayToJson.serializeHeadersVertical;
 import static com.twosigma.beakerx.table.TableDisplayToJson.serializeRendererForColumn;
 import static com.twosigma.beakerx.table.TableDisplayToJson.serializeRendererForType;
+import static com.twosigma.beakerx.table.TableDisplayToJson.serializeRowsToShow;
 import static com.twosigma.beakerx.table.TableDisplayToJson.serializeStringFormatForColumn;
 import static com.twosigma.beakerx.table.TableDisplayToJson.serializeStringFormatForType;
 import static com.twosigma.beakerx.table.TableDisplayToJson.serializeTimeZone;
 import static com.twosigma.beakerx.table.TableDisplayToJson.serializeTooltips;
+import static com.twosigma.beakerx.table.TableDisplayUtils.transformToIndex;
 import static com.twosigma.beakerx.util.Preconditions.checkState;
 import static com.twosigma.beakerx.widget.CompiledCodeRunner.runCompiledCode;
 
@@ -75,7 +77,7 @@ public class TableDisplay extends BeakerxWidget {
   public static final String LIST_OF_MAPS_SUBTYPE = "ListOfMaps";
   public static final String MATRIX_SUBTYPE = "Matrix";
   public static final String DICTIONARY_SUBTYPE = "Dictionary";
-  public static final String THE_LENGTH_OF_TYPES_SHOULD_BE_SAME_AS_NUMBER_OF_ROWS = "The length of types should be same as number of rows.";
+  public static final String THE_LENGTH_OF_TYPES_SHOULD_BE_SAME_AS_NUMBER_OF_COLUMNS = "The length of types should be same as number of columns.";
   public static final String LOAD_MORE_ROWS = "loadMoreRows";
 
   public int ROWS_LIMIT = 100000;
@@ -113,6 +115,7 @@ public class TableDisplay extends BeakerxWidget {
   public static int PAGE_SIZE = 1000;
   private TableDisplayModel model;
   private String loadMoreRows = "loadMoreServerInit";
+  private RowsToShow rowsToShow = RowsToShow.SHOW_25;
 
   @Override
   public String getModelNameValue() {
@@ -144,7 +147,7 @@ public class TableDisplay extends BeakerxWidget {
   public TableDisplay(List<List<?>> v, List<String> co, List<String> cl) {
     super();
     if (!v.isEmpty() && v.get(0) != null && !v.get(0).isEmpty()) {
-      checkState(v.get(0).size() == cl.size(), THE_LENGTH_OF_TYPES_SHOULD_BE_SAME_AS_NUMBER_OF_ROWS);
+      checkState(v.get(0).size() == cl.size(), THE_LENGTH_OF_TYPES_SHOULD_BE_SAME_AS_NUMBER_OF_COLUMNS);
     }
     this.model = new TableDisplayListModel(v, co, cl, new BasicObjectSerializer());
     openComm();
@@ -158,6 +161,13 @@ public class TableDisplay extends BeakerxWidget {
     this.model.initValues();
   }
 
+  public TableDisplay(Stream<Map<String, Object>> v, BeakerObjectConverter serializer, Message message) {
+    super();
+    this.model = new TableDisplayMapModel(v, serializer);
+    openComm(message);
+    this.model.initValues();
+  }
+
   public TableDisplay(Stream<Map<String, Object>> v) {
     this(v, new BasicObjectSerializer());
   }
@@ -166,12 +176,27 @@ public class TableDisplay extends BeakerxWidget {
     this(v, new BasicObjectSerializer());
   }
 
+  public TableDisplay(Collection<Map<String, Object>> v, int columnIndex) {
+    this(transformToIndex(v, columnIndex), new BasicObjectSerializer());
+    if (getColumnNames().size() > 0) {
+      setHasIndex(getColumnNames().get(0));
+    }
+  }
+
   public TableDisplay(Map<String, Object>[] v) {
     this(new ArrayList<>(Arrays.asList(v)), new BasicObjectSerializer());
   }
 
+  public TableDisplay(Map<String, Object>[] v, Message message) {
+    this(new ArrayList<>(Arrays.asList(v)), new BasicObjectSerializer(), message);
+  }
+
   public TableDisplay(Collection<Map<String, Object>> v, BeakerObjectConverter serializer) {
     this(v.stream(), serializer);
+  }
+
+  public TableDisplay(Collection<Map<String, Object>> v, BeakerObjectConverter serializer, Message message) {
+    this(v.stream(), serializer, message);
   }
 
   public TableDisplay(int rowCount, int columnCount, List<String> columnNames, Element element) {
@@ -181,7 +206,12 @@ public class TableDisplay extends BeakerxWidget {
   @Override
   protected void addValueChangeMsgCallback() {
     getComm().addMsgCallbackList(new ValueChangeMsgCallbackHandler(() -> setLoadMoreRows("loadMoreServerDone")));
-    getComm().addMsgCallbackList(new StateRequestMsgCallbackHandler(this::sendModel));
+  }
+
+  @Override
+  public void stateRequestHandler() {
+    super.stateRequestHandler();
+    sendModel();
   }
 
   @Override
@@ -335,7 +365,6 @@ public class TableDisplay extends BeakerxWidget {
   }
 
   public void addCellHighlighter(Object closure) {
-    Map<String, List<Color>> colors = new HashMap<>();
     try {
       int rowSize = this.model.values.get(0).size();
       for (int colInd = 0; colInd < rowSize; colInd++) {
@@ -359,7 +388,6 @@ public class TableDisplay extends BeakerxWidget {
   }
 
   public void addCellHighlighter(CellHighlighter cellHighlighter) {
-    Map<String, List<Color>> colors = new HashMap<>();
     try {
       int rowSize = this.model.values.get(0).size();
       for (int colInd = 0; colInd < rowSize; colInd++) {
@@ -550,7 +578,7 @@ public class TableDisplay extends BeakerxWidget {
     if (columns != null && values != null) {
 
       for (List<?> value : values) {
-        Map<String, Object> m = new HashMap<String, Object>();
+        Map<String, Object> m = new LinkedMap();
         for (int c = 0; c < columns.size(); c++) {
           if (value.size() > c)
             m.put(columns.get(c), value.get(c));
@@ -723,6 +751,15 @@ public class TableDisplay extends BeakerxWidget {
 
   public void setRowLimitMsg(String rowLimitMsg) {
     this.rowLimitMsg = rowLimitMsg;
+  }
+
+  public void setRowsToShow(RowsToShow rows) {
+    this.rowsToShow = rows;
+    sendModelUpdate(serializeRowsToShow(this.rowsToShow));
+  }
+
+  public RowsToShow getRowsToShow() {
+    return rowsToShow;
   }
 
   @Override

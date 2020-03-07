@@ -21,7 +21,8 @@ from ipykernel.comm import Comm
 from pandas import DataFrame, RangeIndex, MultiIndex, DatetimeIndex
 from traitlets import Unicode, Dict
 
-from .tableitems import DateType, ColumnType, TableDisplayAlignmentProvider, TableDisplayStringFormat, Highlighter
+from .tableitems import DateType, ColumnType, TableDisplayAlignmentProvider, TableDisplayStringFormat, Highlighter, \
+    RowsToShow
 
 
 class Table(BaseObject):
@@ -29,7 +30,7 @@ class Table(BaseObject):
     PAGE_SIZE = 1000
 
     def __init__(self, *args, **kwargs):
-
+        self.validate_args(args)
         self.values = []
         self.types = []
         types_map = dict()
@@ -68,6 +69,11 @@ class Table(BaseObject):
         self.filteredValues = None
         self.endlessIndex = 0
         self.loadingMode = 'ALL'
+        self.rowsToShow = RowsToShow.SHOW_25
+
+    def validate_args(self, args):
+        if len(args) > 2 and len(args[1]) != len(args[2]):
+            raise Exception("The length of types should be same as number of columns.")
 
     def convert_from_dict(self, args):
         self.columnNames.append("Key")
@@ -98,16 +104,24 @@ class Table(BaseObject):
                 row.append(self.convert_value(value, value_type))
             self.values.append(row)
 
+    @staticmethod
+    def has_types(args):
+        return len(args) > 2
+
     def convert_from_pandas(self, args, types_map):
         self.columnNames = args[0].columns.tolist()
         if args[0].index.name is not None and args[0].index.name in self.columnNames:
             self.columnNames.remove(args[0].index.name)
 
-        column = None
-        for column in self.columnNames:
-            column_type = self.convert_type(args[0].dtypes[column].name)
-            self.types.append(column_type)
-            types_map[column] = column_type
+        if self.has_types(args):
+            self.types = args[2]
+            types_map = dict(zip(self.columnNames, self.types))
+        else:
+            column = None
+            for column in self.columnNames:
+                column_type = self.convert_type(args[0].dtypes[column].name)
+                self.types.append(column_type)
+                types_map[column] = column_type
         for index in range(len(args[0])):
             row = []
             for columnName in self.columnNames:
@@ -149,7 +163,7 @@ class Table(BaseObject):
     @staticmethod
     def convert_value(value, value_type, tz=None):
         if value_type == "time":
-            if np.isnat(value):
+            if isinstance(value, np.datetime64) and np.isnat(value):
                 return str(Table.NAT_VALUE)
             return DateType(value, tz)
         else:
@@ -188,8 +202,12 @@ class Table(BaseObject):
             row = self.values[row_ind]
             row_font_colors = []
             for col_ind in range(0, len(row)):
-                row_font_colors.append(colorProvider(row_ind, col_ind, self))
+                if self.is_not_index_column(col_ind):
+                    row_font_colors.append(colorProvider(row_ind, col_ind, self))
             self.fontColor.append(row_font_colors)
+
+    def is_not_index_column(self, col_ind):
+        return not self.hasIndex or col_ind != 0
 
     def setHeadersVertical(self, headersVertical):
         self.headersVertical = headersVertical
@@ -199,6 +217,9 @@ class Table(BaseObject):
         for row_ind in range(0, len(self.values)):
             if filter_row(row_ind, self.values):
                 self.filteredValues.append(self.values[row_ind])
+
+    def setRowsToShow(self, rows):
+        self.rowsToShow = rows
 
     def transform(self):
         if TableDisplay.loadingMode == "ALL":
@@ -394,6 +415,13 @@ class TableDisplay(BeakerxDOMWidget):
     def setRowFilter(self, filter_row):
         self.chart.setRowFilter(filter_row)
         self.model = self.chart.transform()
+
+    def setRowsToShow(self, rows):
+        if isinstance(rows, RowsToShow):
+            self.chart.setRowsToShow(rows)
+            self.model = self.chart.transform()
+        return self
+
 
 
 class TableActionDetails:

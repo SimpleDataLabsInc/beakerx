@@ -95,6 +95,14 @@ class HighlightStyle(Enum):
     SINGLE_COLUMN = "SINGLE_COLUMN"
 
 
+class RowsToShow(Enum):
+    SHOW_10 = 10
+    SHOW_25 = 25
+    SHOW_50 = 50
+    SHOW_100 = 100
+    SHOW_ALL = -1
+
+
 class Highlighter:
     pass
 
@@ -156,3 +164,24 @@ class TableDisplayCellHighlighter:
     @staticmethod
     def getUniqueEntriesHighlighter(colName, style=defaultStyle):
         return UniqueEntriesHighlighter(colName, style)
+
+
+class ThreeColorHeatmapHighlighter(HeatmapHighlighter):
+
+    type = "ThreeColorHeatmapHighlighter"
+
+    def __init__(self, colName, style, minVal, midVal, maxVal, minColor, midColor, maxColor):
+        self.midColor = midColor
+        self.midVal = midVal
+        self.colName = colName
+        self.style = style.name
+        self.minVal = minVal
+        self.maxVal = maxVal
+        self.minColor = minColor
+        self.maxColor = maxColor
+
+    def getMidVal(self):
+        return self.midVal
+
+    def getMidColor(self):
+        return self.midColor

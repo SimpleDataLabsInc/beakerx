@@ -33,8 +33,9 @@ import CellFocusManager from "./cell/CellFocusManager";
 import CellTooltipManager from "./cell/CellTooltipManager";
 import {BeakerXDataStore} from "./store/BeakerXDataStore";
 import {
-  selectHasIndex,
-  selectValues
+    selectHasIndex,
+    selectRowsToShow,
+    selectValues
 } from "./model/selectors";
 import throttle = DataGridHelpers.throttle;
 import DataGridCell from "./cell/DataGridCell";
@@ -47,7 +48,8 @@ import {DataGridResize} from "./DataGridResize";
 import {ALL_TYPES} from "./dataTypes";
 import BeakerXThemeHelper from "beakerx_shared/lib/utils/BeakerXThemeHelper";
 import CommonUtils from "beakerx_shared/lib/utils/CommonUtils";
-import {TableDisplayWidget} from "../../TableDisplay";
+import {TableDisplayView, TableDisplayWidget} from "../../TableDisplay";
+import BeakerXApi from "beakerx_shared/lib/api/BeakerXApi";
 
 declare global {
   interface Window {
@@ -76,15 +78,17 @@ export class BeakerXDataGrid extends DataGrid {
   canvasGC: GraphicsContext;
   focused: boolean;
   wrapperId: string;
-  tableDisplayView: TableDisplayWidget;
+  tableDisplayView: TableDisplayWidget & TableDisplayView;
+  api: BeakerXApi;
 
   cellHovered = new Signal<this, { data: ICellData|null, event: MouseEvent }>(this);
   commSignal = new Signal<this, {}>(this);
 
   static FOCUS_CSS_CLASS = 'bko-focused';
 
-  constructor(options: DataGrid.IOptions, dataStore: BeakerXDataStore, tableDisplayView: TableDisplayWidget) {
+  constructor(options: DataGrid.IOptions, dataStore: BeakerXDataStore, tableDisplayView: TableDisplayWidget & TableDisplayView) {
     super(options);
+    this.initApi();
 
     //this is hack to use private DataGrid properties
     this.viewport = this['_viewport'];
@@ -98,12 +102,24 @@ export class BeakerXDataGrid extends DataGrid {
     this.init(dataStore);
   }
 
+  private initApi() {
+      let baseUrl;
+
+      try {
+          baseUrl = `${(Jupyter.notebook_list || Jupyter.notebook).base_url}`;
+      } catch (e) {
+          baseUrl = `${window.location.origin}/`;
+      }
+
+      this.api = new BeakerXApi(baseUrl);
+  }
+
   init(store: BeakerXDataStore) {
     this.id = 'grid_' + CommonUtils.generateId(6);
     this.store = store;
     this.columnManager = new ColumnManager(this);
     this.columnPosition = new ColumnPosition(this);
-    this.rowManager = new RowManager(selectValues(store.state), selectHasIndex(store.state), this.columnManager);
+    this.rowManager = new RowManager(selectValues(store.state), selectHasIndex(store.state), this.columnManager, selectRowsToShow(store.state));
     this.cellSelectionManager = new CellSelectionManager(this);
     this.cellManager = new CellManager(this);
     this.eventManager = new EventManager(this);

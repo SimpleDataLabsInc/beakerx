@@ -108,7 +108,8 @@ The notebook extensions are installed to run out of the repo, so just
 a local build should suffice:
 
 ```
-(cd js/notebook; yarn install)
+(cd js/notebook; yarn run build)
+beakerx install
 ```
 
 ### Run TypeScript Unit Tests
@@ -118,6 +119,7 @@ The Java and TypeScript unit tests are run with every build. See [test/README.md
 ### Run Python Unit Tests
 ```
 (cd beakerx; python -m unittest)
+(cd beakerx_tabledisplay; python -m unittest)
 ```
 
 ## Groovy with Interactive Plotting:

@@ -41,7 +41,7 @@ ENV NB_USER beakerx
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update
-RUN apt-get update && apt-get install -y --no-install-recommends apt-utils sudo curl unzip software-properties-common apt-transport-https git bzip2 wget locales libsass-dev libsass0
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils sudo curl unzip software-properties-common apt-transport-https git bzip2 wget locales libsass-dev libsass0 python python3 build-essential
 RUN apt-get dist-upgrade -y
 RUN locale-gen en_US.UTF-8
 
@@ -57,7 +57,7 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
     rm ~/miniconda.sh
 
 RUN apt-get clean
-RUN apt-get dist-upgrade
+
 COPY configuration.yml /home/beakerx/
 RUN conda update -n base -c defaults conda
 RUN conda env create -n beakerx -f /home/beakerx/configuration.yml
@@ -66,6 +66,7 @@ RUN conda install -y -n beakerx -c conda-forge jupyterhub jupyterlab pyzmq pytes
 ENV LANG=en_US.UTF-8
 ENV LC_CTYPE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
+ENV REMOVE_DASH_LINECOMMENT="true"
 ENV SHELL /bin/bash
 ENV NB_UID 1000
 ENV HOME /home/$NB_USER
@@ -82,7 +83,7 @@ WORKDIR $HOME
 #      Build      #
 ###################
 RUN chown -R beakerx:beakerx /home/beakerx /opt/conda/envs/beakerx  && \
-    /home/beakerx/setup.sh
+    /bin/bash /home/beakerx/setup.sh
 
 # Add documentation
 COPY NOTICE README.md StartHere.ipynb doc /home/beakerx/

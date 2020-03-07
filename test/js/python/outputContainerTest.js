@@ -17,7 +17,7 @@
 var BeakerXPageObject = require('../beakerx.po.js');
 var beakerxPO;
 
-describe('(Groovy) Output Containers ', function () {
+describe('(Python) Output Containers ', function () {
 
   beforeAll(function () {
     beakerxPO = new BeakerXPageObject();
@@ -59,10 +59,6 @@ describe('(Groovy) Output Containers ', function () {
     });
   });
 
-  function clickOnTabByName(output, name){
-    output.$('div.p-TabBar-tabLabel=' + name).click();
-  }
-
   function getTabLabelText(output, tabIndex){
     return output.$$('div.p-TabBar-tabLabel')[tabIndex].getText();
   }
@@ -76,7 +72,8 @@ describe('(Groovy) Output Containers ', function () {
       var codeCell = beakerxPO.runCodeCellByIndex(cellIndex);
       output = beakerxPO.getAllOutputsWidget(codeCell)[0];
       browser.waitUntil(function(){
-        return (output.$$('div.widget-tab-contents').length > 0);
+        return (output.$$('div.widget-tab-contents').length > 0)
+          && (output.$$('div.p-TabBar-tabLabel').length > 0);
       });
       plotWidgets =  output.$('div.widget-tab-contents').$$('div.dtcontainer');
       expect(plotWidgets.length).toBe(3);
@@ -88,16 +85,16 @@ describe('(Groovy) Output Containers ', function () {
     });
 
     it('Tabbed Output contains 3 plots and 1 table ', function () {
-      clickOnTabByName(output, 'Scatter with History');
+      output.$$('div.p-TabBar-tabLabel')[0].click();
       expect(widgetPlotIsVisible(plotWidgets[0])).toBeTruthy();
 
-      clickOnTabByName(output, 'Short Term');
+      output.$$('div.p-TabBar-tabLabel')[1].click();
       expect(widgetPlotIsVisible(plotWidgets[1])).toBeTruthy();
 
-      clickOnTabByName(output, 'Long Term');
+      output.$$('div.p-TabBar-tabLabel')[2].click();
       expect(widgetPlotIsVisible(plotWidgets[2])).toBeTruthy();
 
-      clickOnTabByName(output, '1990/01');
+      output.$$('div.p-TabBar-tabLabel')[3].click();
       expect(widgetTableIsVisible(output)).toBeTruthy();
     });
   });
