@@ -19,6 +19,6 @@ source activate beakerx
 beakerx install
 beakerx_databrowser install
 jupyter labextension install @jupyter-widgets/jupyterlab-manager
-(cd js/lab; jupyter labextension install .)
+(cd js/lab; jupyter labextension install . --debug)
 
 rm -rf docker .DS_Store .git .gradle .idea jitpack.yml kernel RELEASE.md test .cache .yarn .local logs .ipynb_checkpoints
