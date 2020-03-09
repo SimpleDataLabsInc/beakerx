@@ -41,14 +41,14 @@ ENV NB_USER beakerx
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update
-RUN apt-get update && apt-get install -y --no-install-recommends apt-utils sudo curl unzip software-properties-common apt-transport-https git bzip2 wget locales libsass-dev libsass0
+RUN apt-get install -y --no-install-recommends apt-utils sudo curl unzip software-properties-common apt-transport-https git bzip2 wget locales python
 RUN apt-get dist-upgrade -y
 RUN locale-gen en_US.UTF-8
 
 # Install Yarn
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
 	echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-	apt-get update && apt-get install yarn npm python3-libsass -y
+	apt-get update && apt-get install yarn -y
 
 # Install Conda
 RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
@@ -69,7 +69,10 @@ ENV LC_ALL=en_US.UTF-8
 ENV SHELL /bin/bash
 ENV NB_UID 1000
 ENV HOME /home/$NB_USER
-
+RUN mkdir -p $HOME/.npm && \
+    chown beakerx:beakerx $HOME/.npm
+RUN mkdir -p $HOME/.config && \
+    chown beakerx:beakerx $HOME/.config
 COPY beakerx jitpack.yml js kernel test /home/beakerx/
 COPY docker/setup.sh / $HOME/
 COPY docker/start.sh docker/start-notebook.sh docker/start-singleuser.sh /usr/local/bin/
@@ -98,4 +101,4 @@ USER $NB_USER
 RUN mkdir -pv $HOME/jars
 EXPOSE 8888
 
-CMD ["start-notebook.sh"]
+#CMD ["start-notebook.sh --debug"]
