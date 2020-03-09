@@ -18,15 +18,15 @@ ARG VCS_REF
 ARG VERSION
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
-      org.label-schema.name="BeakerX" \
-      org.label-schema.description="BeakerX is a collection of kernels and extensions to the Jupyter interactive computing environment. It provides JVM support, interactive plots, tables, forms, publishing, and more." \
-      org.label-schema.url="http://beakerx.com/" \
+      org.label-schema.name="Prophecy.io" \
+      org.label-schema.description="Prophecy.io Notebook" \
+      org.label-schema.url="http://prophecy.io/" \
       org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url="https://github.com/twosigma/beakerx" \
+      org.label-schema.vcs-url="https://github.com/SimpleDataLabsInc/beakerx.git" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"
 
-MAINTAINER BeakerX Feedback <beakerx-feedback@twosigma.com>
+MAINTAINER Prophecy.io <info@prophecy.io>
 
 
 ###################
@@ -57,10 +57,12 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
     rm ~/miniconda.sh
 
 RUN apt-get clean
-
+RUN apt-get dist-upgrade
 COPY configuration.yml /home/beakerx/
+RUN conda update -n base -c defaults conda
 RUN conda env create -n beakerx -f /home/beakerx/configuration.yml
 RUN conda install -y -n beakerx -c conda-forge jupyterhub jupyterlab pyzmq pytest
+
 ENV LANG=en_US.UTF-8
 ENV LC_CTYPE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
@@ -75,7 +77,8 @@ COPY beakerx jitpack.yml js kernel test /home/beakerx/
 COPY docker/setup.sh / $HOME/
 COPY docker/start.sh docker/start-notebook.sh docker/start-singleuser.sh /usr/local/bin/
 COPY docker/jupyter_notebook_config.py /etc/jupyter/
-
+RUN conda init --all
+RUN bash
 WORKDIR $HOME
 
 ###################
@@ -86,6 +89,7 @@ RUN chown -R beakerx:beakerx /home/beakerx /opt/conda/envs/beakerx  && \
 
 # Add documentation
 COPY NOTICE README.md StartHere.ipynb doc /home/beakerx/
+
 USER root
 RUN mkdir -pv /app/common
 RUN mkdir -pv /app/logs
@@ -93,9 +97,8 @@ RUN mkdir -pv /app/cache
 RUN mkdir -pv /opt/conda/envs/beakerx/share/beakerx/maven/cache/
 RUN chown -R beakerx:beakerx /app/common /app/logs /app/cache /opt/conda/envs/beakerx/share/beakerx/maven/cache/
 VOLUME ["/app/common", "/app/logs", "/app/cache", "/opt/conda/envs/beakerx/share/beakerx/maven/cache/"]
-
 USER $NB_USER
-
+RUN mkdir -pv $HOME/jars
 EXPOSE 8888
 
 #CMD ["start-notebook.sh --debug"]
